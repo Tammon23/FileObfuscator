@@ -1,0 +1,2 @@
+class InvalidFileNameException(Exception):
+    pass

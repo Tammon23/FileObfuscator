@@ -1,3 +1,4 @@
+from Exceptions.InvalidFileNameException import InvalidFileNameException
 from helper import ObfuscationMethods, SaveMethods
 from obfuscator import Obfuscator
 from typing import Tuple
@@ -35,8 +36,7 @@ parser.add_argument('-d', '--deep',
                     const=inf,
                     default=inf,
                     type=int,
-                    help='Look for files within folders, optionally specifiy max depth (default is infinite). Only '
-                         'valid when -f used')
+                    help='Look for files within folders, optionally specify max depth (default is infinite)')
 
 parser.add_argument('-s', '--save',
                     nargs=1,
@@ -52,17 +52,43 @@ parser.add_argument('-de', '--deobfuscate',
                     action='store_true',
                     help='Undoes the obfuscation')
 
+parser.add_argument('-ie', '--ignore_extensions',
+                    nargs='+',
+                    default=list(),
+                    help='Ignores all files with the provided list of extensions')
+
+parser.add_argument('-iecs', '--ignore_extensions_case_sensitive',
+                    action='store_true',
+                    help='Specifies that the the list of ignored extensions should be considered as case sensitive')
+
+parser.add_argument('-ip', '--ignore_path',
+                    nargs='+',
+                    default=list(),
+                    help='Ignores all files/folders if it makes the relative path')
+
+parser.add_argument('-ipcs', '--ignore_path_case_sensitive',
+                    action='store_true',
+                    help='Specifies that the the list of ignored files/folders should be considered as case sensitive')
+
 if __name__ == "__main__":
     args = parser.parse_args()
 
     obfuscator = Obfuscator()
     obfuscator.load(args.path, args.deep)
 
-    if args.deobfuscate:
-        obfuscator.deobfuscate(args.method)
-    else:
-        obfuscator.obfuscate(args.method)
+    try:
+        method = ObfuscationMethods[args.method.upper()]
+        if args.deobfuscate:
+            obfuscator.deobfuscate(method)
+        else:
+            obfuscator.obfuscate(method)
 
-    if args.save is not None:
-        save_location, save_method = args.save[0]
-        obfuscator.save_changes(save_location, save_method)
+    except InvalidFileNameException as error:
+        print(error)
+
+    else:
+        if args.save is not None:
+            save_location, save_method = args.save[0]
+            obfuscator.save_changes(save_location, save_method)
+
+        print(f"Finished renaming {obfuscator.get_number_of_renamed_files()} folders...")

@@ -4,6 +4,8 @@ from typing import List
 
 class ObfuscationMethods(Enum):
     ROT13 = 1
+    HEX = 2
+    DEC = 3
 
     @staticmethod
     def get_methods() -> List[str]:

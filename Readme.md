@@ -20,6 +20,16 @@ options:
   -de, --deobfuscate    Undoes the obfuscation
 ```
 
+The following is an example of how to decimal encode all file name inside the folder `testFolder` recursively, with no depth limit.
+Followed by how to decode the same files under the same method
+
+```shell
+# encode
+python3.10 main.py testFolder -d -m dec
+# decode
+python3.10 main.py testFolder -d -m dec -de
+```
+
 # Future Plans
 - Add the ability to obfuscate/deobfuscate folder names as well
 - Add the option to do multilayered obfuscation combining a series of methods
