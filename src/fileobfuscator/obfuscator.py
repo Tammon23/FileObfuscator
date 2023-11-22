@@ -1,24 +1,22 @@
-from typing import Mapping, Set, Union, Callable
-from textwrap import wrap
+from typing import Mapping, Set, Union, Callable, List
 from pathlib import Path
 from math import inf
-import codecs
 import os
 import csv
 import json
-import binascii
 
-from Exceptions.InvalidFileNameException import InvalidFileNameException
-from helper import ObfuscationMethods, SaveMethods
+from fileobfuscator.Ciphers import ROT13, DEC, HEX
+from fileobfuscator.Exceptions.InvalidFileNameException import InvalidFileNameException
+from fileobfuscator.helper import ObfuscationMethods, SaveMethods
 
 
 # MAX_FILENAME_LENGTH = os.path.getconf('/', 'PC_NAME_MAX')
 
 
 class Obfuscator:
-    def __init__(self, exclusion_list: Union[Set[str], None] = None):
+    def __init__(self, exclusion_set: Union[Set[str], None] = None):
 
-        self.exclusion_list: Set[str] = exclusion_list if exclusion_list else {}
+        self.exclusion_set: Set[str] = exclusion_set if exclusion_set else {}
         self.paths: Mapping[Path, Path | None] = {}
 
     def load(self, root: Path, depth: int = inf) -> None:
@@ -26,7 +24,8 @@ class Obfuscator:
             raise FileNotFoundError(root)
 
         if root.is_dir():
-            self.__load_all_items(root, max_depth=depth)
+            found_paths = self.__load_all_items(root, max_depth=depth)
+            self.paths = {path: None for path in found_paths}
         else:
             self.paths[root] = None
 
@@ -35,19 +34,16 @@ class Obfuscator:
 
         match method:
             case ObfuscationMethods.ROT13:
-                function_encoding = lambda x: codecs.encode(x, 'rot13')
+                function_encoding = ROT13.encode
 
             case ObfuscationMethods.HEX:
-                function_encoding = lambda x: codecs.encode(x.encode(), 'hex').decode("utf-8")
+                function_encoding = HEX.encode
 
             case ObfuscationMethods.DEC:
-                function_encoding = lambda x: "".join([str(ord(letter)).zfill(3) for letter in x])
-
-            case _:
-                function_encoding = lambda x: x
+                function_encoding = DEC.encode
 
         for path in self.paths:
-            new_path = f"{path.parent}/{function_encoding(path.stem)}{path.suffix}"
+            new_path = f"{path.parent}/{function_encoding(path.stem)}{path.suffix}" # NOQA
             self.paths[path] = Path(new_path)
 
         self.update()
@@ -57,19 +53,16 @@ class Obfuscator:
 
         match method:
             case ObfuscationMethods.ROT13:
-                function_decoding = lambda x: codecs.decode(x, 'rot13')
+                function_decoding = ROT13.decode
 
             case ObfuscationMethods.HEX:
-                function_decoding = lambda x: codecs.decode(x.encode(), 'hex').decode()
+                function_decoding = HEX.decode
 
             case ObfuscationMethods.DEC:
-                function_decoding = lambda x: "".join([chr(int(ascii_char)) for ascii_char in wrap(x, 3)])
-
-            case _:
-                function_decoding = lambda x: x
+                function_decoding = DEC.decode
 
         for path in self.paths:
-            old_path = f"{path.parent}/{function_decoding(path.stem)}{path.suffix}"
+            old_path = f"{path.parent}/{function_decoding(path.stem)}{path.suffix}" # NOQA
             self.paths[path] = Path(old_path)
 
         self.update()
@@ -102,15 +95,18 @@ class Obfuscator:
     def get_number_of_renamed_files(self) -> int:
         return len(self.paths)
 
-    def __load_all_items(self, root: Path, max_depth: int = inf, current_depth: int = 0) -> None:
-        exclusion_list = self.exclusion_list
+    def __load_all_items(self, root: Path, max_depth: int = inf, current_depth: int = 0) -> List[Path]:
+        exclusion_set = self.exclusion_set
+        temp: List[Path] = []
 
         for item in root.iterdir():
-            if item.name in exclusion_list:
+            if item.name in exclusion_set:
                 continue
 
             if item.is_file():
-                self.paths[item] = None
+                temp.append(item)
 
             if item.is_dir() and current_depth < max_depth:
-                self.__load_all_items(item, current_depth + 1, max_depth)
+                temp += self.__load_all_items(item, current_depth + 1, max_depth)
+
+        return temp

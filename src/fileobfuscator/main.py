@@ -1,5 +1,5 @@
-from Exceptions.InvalidFileNameException import InvalidFileNameException
-from helper import ObfuscationMethods, SaveMethods
+from fileobfuscator.Exceptions.InvalidFileNameException import InvalidFileNameException
+from fileobfuscator.helper import ObfuscationMethods, SaveMethods
 from obfuscator import Obfuscator
 from typing import Tuple
 from pathlib import Path

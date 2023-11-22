@@ -1,0 +1,34 @@
+[project]
+name = "fileobfuscator"
+version = "0.0.1"
+description = "A client-line interface that automatically obfuscates and deobfuscates filenames located anywhere on your computer"
+readme = "Readme.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+keywords = ["obfuscation", "filename"]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+authors = [
+  {name = "Ikenna"}
+]
+
+maintainers = [
+  {name = "Ikenna"}
+]
+
+[project.urls]
+"Source" = "https://github.com/Tammon23/FileObfuscator"
+"Issues" = "https://github.com/Tammon23/FileObfuscator/issues"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# logic for cli
+#[project.scripts]
+#fileobfuscator = "fileobfuscator.main"

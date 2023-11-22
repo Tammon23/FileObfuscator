@@ -20,7 +20,7 @@ options:
   -de, --deobfuscate    Undoes the obfuscation
 ```
 
-The following is an example of how to decimal encode all file name inside the folder `testFolder` recursively, with no depth limit.
+The following is an example of how to decimal encode all file names inside the folder `testFolder` recursively, with no depth limit.
 Followed by how to decode the same files under the same method
 
 ```shell
