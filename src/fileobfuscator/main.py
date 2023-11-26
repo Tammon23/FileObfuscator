@@ -1,7 +1,7 @@
 from fileobfuscator.Exceptions.InvalidFileNameException import InvalidFileNameException
 from fileobfuscator.helper import ObfuscationMethods, SaveMethods
-from obfuscator import Obfuscator
-from typing import Tuple
+from fileobfuscator.obfuscator import Obfuscator
+from typing import Tuple, List
 from pathlib import Path
 from math import inf
 import argparse
@@ -9,7 +9,7 @@ import argparse
 obfuscation_methods = ObfuscationMethods.get_methods()
 
 
-def ValidSaveFormat(root: str) -> Tuple[Path, SaveMethods]:
+def ValidateSaveFormat(root: str) -> Tuple[Path, SaveMethods]:
     root = Path(root)
     match root.suffix.lower():
         case ".csv":
@@ -40,7 +40,7 @@ parser.add_argument('-d', '--deep',
 
 parser.add_argument('-s', '--save',
                     nargs=1,
-                    type=ValidSaveFormat,
+                    type=ValidateSaveFormat,
                     help="Save old to new name mappings at specified location. Valid types: CSV, JSON")
 
 parser.add_argument('-m', '--method',
@@ -54,26 +54,29 @@ parser.add_argument('-de', '--deobfuscate',
 
 parser.add_argument('-ie', '--ignore_extensions',
                     nargs='+',
-                    default=list(),
+                    type=set,
                     help='Ignores all files with the provided list of extensions')
 
 parser.add_argument('-iecs', '--ignore_extensions_case_sensitive',
                     action='store_true',
                     help='Specifies that the the list of ignored extensions should be considered as case sensitive')
 
-parser.add_argument('-ip', '--ignore_path',
+parser.add_argument('-ip', '--ignore_paths',
                     nargs='+',
-                    default=list(),
+                    type=set,
                     help='Ignores all files/folders if it makes the relative path')
 
-parser.add_argument('-ipcs', '--ignore_path_case_sensitive',
+parser.add_argument('-ipcs', '--ignore_paths_case_sensitive',
                     action='store_true',
                     help='Specifies that the the list of ignored files/folders should be considered as case sensitive')
 
-if __name__ == "__main__":
+
+def main():
     args = parser.parse_args()
 
-    obfuscator = Obfuscator()
+    obfuscator = Obfuscator(args.ignore_extensions, args.ignore_extensions_case_sensitive,
+                            args.ignore_paths, args.ignore_paths_case_sensitive)
+
     obfuscator.load(args.path, args.deep)
 
     try:
@@ -91,4 +94,8 @@ if __name__ == "__main__":
             save_location, save_method = args.save[0]
             obfuscator.save_changes(save_location, save_method)
 
-        print(f"Finished renaming {obfuscator.get_number_of_renamed_files()} folders...")
+        print(f"Finished running through {obfuscator.get_number_of_renamed_files()} items...")
+
+
+if __name__ == "__main__":
+    main()

@@ -30,5 +30,5 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 # logic for cli
-#[project.scripts]
-#fileobfuscator = "fileobfuscator.main"
+[project.scripts]
+fileobfuscator = "fileobfuscator.main:main"
